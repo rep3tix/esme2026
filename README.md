@@ -17,12 +17,30 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 # esme2026
 
-## Onboarding (sans persistance)
+## Persistance locale (utilisateur et theme)
 
-L'application ouvre actuellement l'onboarding au lancement ; l'authentification
-et la detection d'une premiere connexion ne sont pas encore branchees.
-Aucun utilisateur ni avancement n'est enregistre dans un repository.
-Un redemarrage recommence donc le parcours.
+Les donnees sont enregistrees sur l'appareil avec `shared_preferences`,
+chargees une fois au demarrage dans `main.dart`.
+
+- Utilisateur : a la fin de l'onboarding, `OnboardingController` enregistre un
+  [`CurrentUser`](lib/domain/models/current_user.dart) (role, nom, metier,
+  centres d'interet, localisation) via
+  [`CurrentUserRepository`](lib/domain/repositories/current_user_repository.dart).
+  Au lancement suivant, le routeur ouvre directement l'accueil. Le menu
+  « Reglages » de l'accueil permet de recommencer l'inscription.
+- Theme : clair, sombre ou comme l'appareil, choisi depuis le menu « Reglages »
+  de l'accueil et enregistre via
+  [`SettingsRepository`](lib/domain/repositories/settings_repository.dart).
+
+L'avancement d'un onboarding non termine n'est pas enregistre : un redemarrage
+en cours de parcours le recommence. Sans repository fourni (tests), l'application
+utilise des versions en memoire et ne conserve rien. Le stockage n'est pas
+chiffre : n'y mettre aucune donnee sensible.
+
+## Onboarding
+
+L'application ouvre l'onboarding au premier lancement ; l'authentification
+n'est pas encore branchee.
 
 - Artisan : choix du profil -> metier -> localisation -> KYC -> accueil.
 - Particulier : choix du profil -> centres d'interet artisanaux -> prenom et nom

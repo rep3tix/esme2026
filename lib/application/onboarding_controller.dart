@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:esme26/domain/models/current_user.dart';
 import 'package:esme26/domain/models/user.dart';
 import 'package:esme26/domain/onboarding/onboarding_flow.dart';
+import 'package:esme26/domain/repositories/current_user_repository.dart';
 import 'package:esme26/domain/repositories/kyc_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -7,12 +11,15 @@ enum KycStatus { idle, verifying, rejected, failed }
 
 class OnboardingController extends ChangeNotifier {
   final KycRepository kycRepository;
+
+  /// Si fourni, l'utilisateur y est enregistré à la fin du parcours.
+  final CurrentUserRepository? userRepository;
   final OnboardingFlow _flow = OnboardingFlow();
   KycStatus _kycStatus = KycStatus.idle;
   String? _kycError;
   bool _disposed = false;
 
-  OnboardingController({required this.kycRepository});
+  OnboardingController({required this.kycRepository, this.userRepository});
 
   OnboardingStep get step => _flow.step;
   UserRole? get role => _flow.role;
@@ -53,7 +60,36 @@ class OnboardingController extends ChangeNotifier {
 
   void next() {
     _flow.next();
+    _saveIfCompleted();
     notifyListeners();
+  }
+
+  /// L'utilisateur construit à partir des saisies, une fois le parcours terminé.
+  CurrentUser? get result {
+    final role = this.role;
+    if (!isCompleted || role == null) return null;
+    final isArtisan = role == UserRole.artisan;
+    return CurrentUser(
+      role: role,
+      // Les saisies propres à l'autre profil ne sont pas conservées.
+      firstName: isArtisan ? '' : firstName.trim(),
+      lastName: isArtisan ? '' : lastName.trim(),
+      trade: isArtisan ? trade.trim() : '',
+      interests: isArtisan ? const {} : interests,
+      city: city.trim(),
+      postalCode: postalCode.trim(),
+      country: country.trim(),
+      createdAt: DateTime.now(),
+    );
+  }
+
+  void _saveIfCompleted() {
+    final user = result;
+    final repository = userRepository;
+    if (user == null || repository == null) return;
+    // La lecture est mise à jour tout de suite ; l'écriture disque suit.
+    // En cas d'échec, l'onboarding sera simplement reproposé au prochain lancement.
+    unawaited(repository.save(user).catchError((Object error) => debugPrint('Enregistrement impossible : $error')));
   }
 
   bool requestBack() {
@@ -78,6 +114,7 @@ class OnboardingController extends ChangeNotifier {
       if (result == KycResult.approved) {
         _flow.completeKyc();
         _kycStatus = KycStatus.idle;
+        _saveIfCompleted();
       } else {
         _kycStatus = KycStatus.rejected;
       }

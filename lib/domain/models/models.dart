@@ -22,3 +22,5 @@ export 'package:esme26/domain/models/time_slot.dart';
 export 'package:esme26/domain/models/trade.dart';
 export 'package:esme26/domain/models/user.dart';
 export 'package:esme26/domain/models/work_request.dart';
+export 'package:esme26/domain/models/current_user.dart';
+export 'package:esme26/domain/models/theme_preference.dart';

@@ -1,5 +1,6 @@
 import 'package:esme26/application/onboarding_controller.dart';
 import 'package:esme26/data/repositories/kyc_repository.dart' as data;
+import 'package:esme26/domain/repositories/current_user_repository.dart';
 import 'package:esme26/domain/repositories/kyc_repository.dart';
 import 'package:esme26/ui/widgets/onboarding/onboarding_view.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,10 @@ import 'package:go_router/go_router.dart';
 class OnboardingPage extends StatefulWidget {
   final KycRepository? kycRepository;
 
-  const OnboardingPage({super.key, this.kycRepository});
+  /// Si fourni, l'utilisateur y est enregistré à la fin du parcours.
+  final CurrentUserRepository? userRepository;
+
+  const OnboardingPage({super.key, this.kycRepository, this.userRepository});
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -23,6 +27,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     super.initState();
     _controller = OnboardingController(
       kycRepository: widget.kycRepository ?? data.KycRepository.instance,
+      userRepository: widget.userRepository,
     );
     _controller.addListener(_handleControllerChange);
   }
