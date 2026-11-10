@@ -1,18 +1,38 @@
+import 'package:esme26/domain/models/models.dart';
+import 'package:esme26/domain/repositories/kyc_repository.dart';
+import 'package:esme26/ui/pages/home_page.dart';
 import 'package:esme26/ui/pages/onboarding_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 abstract final class AppRoutes {
   static const onboarding = '/';
+  static const home = '/homepage';
 }
 
-/// Le passage onboarding -> accueil reste géré par [OnboardingPage]
-/// (elle observe le contrôleur). Les futures routes (recherche d'artisans,
-/// rendez-vous, profil…) viendront s'ajouter ici.
-GoRouter createRouter() {
+GoRouter createRouter({KycRepository? kycRepository}) {
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
-    routes: [GoRoute(path: AppRoutes.onboarding, name: 'onboarding', builder: (context, state) => const OnboardingPage())],
+    routes: [
+      GoRoute(
+        path: AppRoutes.onboarding,
+        name: 'onboarding',
+        builder: (context, state) => OnboardingPage(kycRepository: kycRepository),
+      ),
+      GoRoute(
+        path: AppRoutes.home,
+        name: 'home',
+        builder: (context, state) {
+          if (state.extra case (role: UserRole role, firstName: String firstName)) {
+            return HomePage(role: role, firstName: firstName);
+          }
+
+          UserRole role = UserRole.customer;
+          String firstName = 'John Doe';
+          return HomePage(role: role, firstName: firstName);
+        },
+      ),
+    ],
     errorBuilder: (context, state) => _NotFoundPage(location: state.uri.path),
   );
 }

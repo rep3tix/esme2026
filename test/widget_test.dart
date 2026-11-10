@@ -1,11 +1,14 @@
 import 'dart:async';
 
 import 'package:esme26/domain/repositories/kyc_repository.dart';
-import 'package:esme26/main.dart';
-import 'package:esme26/ui/pages/onboarding_page.dart';
+import 'package:esme26/ui/router.dart';
 import 'package:esme26/ui/widgets/onboarding/kyc_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+Future<void> pumpApp(WidgetTester tester, {KycRepository? kycRepository}) async {
+  await tester.pumpWidget(MaterialApp.router(routerConfig: createRouter(kycRepository: kycRepository)));
+}
 
 Future<void> tapText(WidgetTester tester, String text) async {
   final finder = find.text(text);
@@ -30,7 +33,7 @@ Future<void> fillLocation(WidgetTester tester) async {
 
 void main() {
   testWidgets('Role selection uses two elevated clickable cards', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     expect(find.text('Votre profil'), findsOneWidget);
     expect(find.text('Je suis artisan'), findsOneWidget);
     expect(find.text('Je suis particulier'), findsOneWidget);
@@ -41,7 +44,8 @@ void main() {
   });
 
   testWidgets('Customer flow validates fields and reaches home without KYC', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    final router = createRouter();
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tapText(tester, 'Je suis particulier');
     expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
     await tapText(tester, 'Poterie et céramique');
@@ -58,12 +62,13 @@ void main() {
 
     expect(find.text('Accueil'), findsOneWidget);
     expect(find.text('Bienvenue Camille !'), findsOneWidget);
+    expect(router.routeInformationProvider.value.uri.path, '/homepage');
     expect(find.byType(KycStep), findsNothing);
     expect(find.byTooltip('Retour'), findsNothing);
   });
 
   testWidgets('Artisan flow validates trade and waits for mock KYC', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     await tapText(tester, 'Je suis artisan');
     await tapText(tester, 'Continuer');
     expect(find.text('Indiquez votre métier.'), findsOneWidget);
@@ -83,7 +88,7 @@ void main() {
   });
 
   testWidgets('Back preserves draft inputs and allows switching role', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     await tapText(tester, 'Je suis particulier');
     await tapText(tester, 'Décoration');
     await tapText(tester, 'Continuer');
@@ -112,7 +117,7 @@ void main() {
 
   testWidgets('KYC rejection and provider failure are visible and retryable', (tester) async {
     final provider = _ControlledKycRepository();
-    await tester.pumpWidget(MaterialApp(home: OnboardingPage(kycRepository: provider)));
+    await pumpApp(tester, kycRepository: provider);
     await tapText(tester, 'Je suis artisan');
     await enterField(tester, 'Métier', 'Potier');
     await tapText(tester, 'Continuer');
@@ -146,11 +151,11 @@ void main() {
   });
 
   testWidgets('A fresh app starts onboarding again without persistence', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     await tapText(tester, 'Je suis artisan');
     await enterField(tester, 'Métier', 'Potier');
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     expect(find.text('Je suis artisan'), findsOneWidget);
     await tapText(tester, 'Je suis artisan');
     expect(find.text('Potier'), findsNothing);
@@ -161,7 +166,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
     await tapText(tester, 'Je suis particulier');
     await tapText(tester, 'Décoration');
     await tapText(tester, 'Continuer');
