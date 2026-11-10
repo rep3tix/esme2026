@@ -43,7 +43,12 @@ class _RoleCard extends StatelessWidget {
   final String description;
   final VoidCallback onTap;
 
-  const _RoleCard({required this.icon, required this.title, required this.description, required this.onTap});
+  const _RoleCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

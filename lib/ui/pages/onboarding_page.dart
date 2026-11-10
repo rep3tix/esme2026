@@ -21,14 +21,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void initState() {
     super.initState();
-    _controller = OnboardingController(kycRepository: widget.kycRepository ?? data.KycRepository.instance);
+    _controller = OnboardingController(
+      kycRepository: widget.kycRepository ?? data.KycRepository.instance,
+    );
     _controller.addListener(_handleControllerChange);
   }
 
   void _handleControllerChange() {
     if (_controller.isCompleted && !_hasNavigated && _controller.role != null) {
       _hasNavigated = true;
-      context.go('/homepage', extra: (role: _controller.role, firstName: _controller.firstName));
+      context.go(
+        '/homepage',
+        extra: (role: _controller.role, firstName: _controller.firstName),
+      );
     }
   }
 
@@ -43,7 +48,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: _controller,
-      builder: (context, _) => _controller.isCompleted ? const SizedBox.shrink() : OnboardingView(controller: _controller),
+      builder: (context, _) => _controller.isCompleted
+          ? const SizedBox.shrink()
+          : OnboardingView(controller: _controller),
     );
   }
 }

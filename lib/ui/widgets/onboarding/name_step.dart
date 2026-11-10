@@ -69,5 +69,7 @@ class _NameStepState extends State<NameStep> {
     );
   }
 
-  String? _requiredName(String? value) => value == null || value.trim().isEmpty ? 'Ce champ est obligatoire.' : null;
+  String? _requiredName(String? value) => value == null || value.trim().isEmpty
+      ? 'Ce champ est obligatoire.'
+      : null;
 }

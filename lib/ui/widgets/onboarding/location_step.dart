@@ -83,5 +83,8 @@ class _LocationStepState extends State<LocationStep> {
     );
   }
 
-  String? _requiredLocation(String? value) => value == null || value.trim().isEmpty ? 'Ce champ est obligatoire.' : null;
+  String? _requiredLocation(String? value) =>
+      value == null || value.trim().isEmpty
+      ? 'Ce champ est obligatoire.'
+      : null;
 }

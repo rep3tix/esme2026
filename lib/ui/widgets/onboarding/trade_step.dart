@@ -6,7 +6,12 @@ class TradeStep extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onNext;
 
-  const TradeStep({super.key, required this.initialValue, required this.onChanged, required this.onNext});
+  const TradeStep({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+    required this.onNext,
+  });
 
   @override
   State<TradeStep> createState() => _TradeStepState();

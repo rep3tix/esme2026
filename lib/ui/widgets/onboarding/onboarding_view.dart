@@ -18,7 +18,10 @@ class OnboardingView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Faisons connaissance'),
+          title: Text(
+            'Faisons connaissance',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           leading: controller.isChoosingRole
               ? null
               : IconButton(

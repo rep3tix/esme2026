@@ -2,7 +2,14 @@ import 'package:esme26/ui/widgets/onboarding/step_intro.dart';
 import 'package:flutter/material.dart';
 
 class InterestsStep extends StatelessWidget {
-  static const options = ['Bois et menuiserie', 'Poterie et céramique', 'Textile et couture', 'Bijouterie', 'Décoration', 'Rénovation'];
+  static const options = [
+    'Bois et menuiserie',
+    'Poterie et céramique',
+    'Textile et couture',
+    'Bijouterie',
+    'Décoration',
+    'Rénovation',
+  ];
 
   static const _icons = <String, IconData>{
     'Bois et menuiserie': Icons.carpenter_outlined,
@@ -17,7 +24,12 @@ class InterestsStep extends StatelessWidget {
   final ValueChanged<String> onToggle;
   final VoidCallback onNext;
 
-  const InterestsStep({super.key, required this.selected, required this.onToggle, required this.onNext});
+  const InterestsStep({
+    super.key,
+    required this.selected,
+    required this.onToggle,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {

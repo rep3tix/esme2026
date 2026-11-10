@@ -7,7 +7,13 @@ class KycStep extends StatelessWidget {
   final String? error;
   final VoidCallback onVerify;
 
-  const KycStep({super.key, required this.busy, required this.rejected, required this.error, required this.onVerify});
+  const KycStep({
+    super.key,
+    required this.busy,
+    required this.rejected,
+    required this.error,
+    required this.onVerify,
+  });
 
   @override
   Widget build(BuildContext context) {
