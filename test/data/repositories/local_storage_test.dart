@@ -1,7 +1,5 @@
 import 'package:esme26/data/repositories/local_current_user_repository.dart';
-import 'package:esme26/data/repositories/local_settings_repository.dart';
 import 'package:esme26/domain/models/current_user.dart';
-import 'package:esme26/domain/models/theme_preference.dart';
 import 'package:esme26/domain/models/user.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,20 +60,5 @@ void main() {
     SharedPreferences.setMockInitialValues({LocalCurrentUserRepository.storageKey: '{pas du json'});
     final prefs = await SharedPreferences.getInstance();
     expect(LocalCurrentUserRepository(prefs).currentUser, isNull);
-  });
-
-  test('theme preference defaults to system and is persisted', () async {
-    final prefs = await SharedPreferences.getInstance();
-    final settings = LocalSettingsRepository(prefs);
-    expect(settings.themePreference, ThemePreference.system);
-
-    await settings.setThemePreference(ThemePreference.dark);
-    expect(LocalSettingsRepository(prefs).themePreference, ThemePreference.dark);
-  });
-
-  test('unknown stored theme falls back to system', () async {
-    SharedPreferences.setMockInitialValues({LocalSettingsRepository.themeKey: 'rose'});
-    final prefs = await SharedPreferences.getInstance();
-    expect(LocalSettingsRepository(prefs).themePreference, ThemePreference.system);
   });
 }

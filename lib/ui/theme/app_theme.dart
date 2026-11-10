@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 ///
 /// Utilisation dans `MaterialApp` :
 /// ```dart
-/// theme: AppTheme.light(),
-/// darkTheme: AppTheme.dark(),
-/// themeMode: ThemeMode.system,
+/// theme: AppTheme.lightTheme,
+/// darkTheme: AppTheme.darkTheme,
+/// themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
 /// ```
 abstract final class AppTheme {
   // ---- Couleurs de marque ------------------------------------------------
@@ -24,7 +24,10 @@ abstract final class AppTheme {
 
   // ---- Thèmes publics ----------------------------------------------------
 
-  static ThemeData light() {
+  static final lightTheme = _light();
+  static final darkTheme = _dark();
+
+  static ThemeData _light() {
     final scheme = ColorScheme.fromSeed(
       seedColor: _brandBlue,
       brightness: Brightness.light,
@@ -44,7 +47,7 @@ abstract final class AppTheme {
     return _build(scheme);
   }
 
-  static ThemeData dark() {
+  static ThemeData _dark() {
     final scheme = ColorScheme.fromSeed(
       seedColor: _brandBlue,
       brightness: Brightness.dark,

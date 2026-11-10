@@ -22,4 +22,3 @@ export 'package:esme26/domain/repositories/trade_repository.dart';
 export 'package:esme26/domain/repositories/user_repository.dart';
 export 'package:esme26/domain/repositories/work_request_repository.dart';
 export 'package:esme26/domain/repositories/current_user_repository.dart';
-export 'package:esme26/domain/repositories/settings_repository.dart';

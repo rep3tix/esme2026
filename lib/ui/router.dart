@@ -1,10 +1,10 @@
-import 'package:esme26/application/settings_controller.dart';
 import 'package:esme26/data/repositories/in_memory_current_user_repository.dart';
 import 'package:esme26/domain/models/models.dart';
 import 'package:esme26/domain/repositories/current_user_repository.dart';
 import 'package:esme26/domain/repositories/kyc_repository.dart';
 import 'package:esme26/ui/pages/home_page.dart';
 import 'package:esme26/ui/pages/onboarding_page.dart';
+import 'package:esme26/ui/widgets/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,8 +14,12 @@ abstract final class AppRoutes {
 }
 
 /// [userRepository] : sans valeur, rien n'est conservé entre deux lancements.
-/// [settings] : sans valeur, l'accueil ne propose pas de changer de thème.
-GoRouter createRouter({KycRepository? kycRepository, CurrentUserRepository? userRepository, SettingsController? settings}) {
+GoRouter createRouter({
+  required ValueNotifier<bool> darkMode,
+  required VoidCallback onToggleDarkMode,
+  KycRepository? kycRepository,
+  CurrentUserRepository? userRepository,
+}) {
   final users = userRepository ?? InMemoryCurrentUserRepository();
 
   return GoRouter(
@@ -24,32 +28,40 @@ GoRouter createRouter({KycRepository? kycRepository, CurrentUserRepository? user
     redirect: (context, state) =>
         state.matchedLocation == AppRoutes.onboarding && users.currentUser != null ? AppRoutes.home : null,
     routes: [
-      GoRoute(
-        path: AppRoutes.onboarding,
-        name: 'onboarding',
-        builder: (context, state) => OnboardingPage(kycRepository: kycRepository, userRepository: users),
-      ),
-      GoRoute(
-        path: AppRoutes.home,
-        name: 'home',
-        builder: (context, state) {
-          Future<void> signOut() async {
-            await users.clear();
-            if (context.mounted) context.go(AppRoutes.onboarding);
-          }
+      ShellRoute(
+        builder: (context, state, child) => AppShell(
+          title: state.uri.path == AppRoutes.home ? 'Accueil' : 'Faisons connaissance',
+          darkMode: darkMode,
+          onToggleDarkMode: onToggleDarkMode,
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: AppRoutes.onboarding,
+            name: 'onboarding',
+            builder: (context, state) => OnboardingPage(kycRepository: kycRepository, userRepository: users),
+          ),
+          GoRoute(
+            path: AppRoutes.home,
+            name: 'home',
+            builder: (context, state) {
+              Future<void> signOut() async {
+                await users.clear();
+                if (context.mounted) context.go(AppRoutes.onboarding);
+              }
 
-          if (state.extra case (role: UserRole role, firstName: String firstName)) {
-            return HomePage(role: role, firstName: firstName, settings: settings, onSignOut: signOut);
-          }
+              if (state.extra case (role: UserRole role, firstName: String firstName)) {
+                return HomePage(role: role, firstName: firstName, onSignOut: signOut);
+              }
 
-          if (users.currentUser case final user?) {
-            return HomePage(role: user.role, firstName: user.firstName, settings: settings, onSignOut: signOut);
-          }
+              if (users.currentUser case final user?) {
+                return HomePage(role: user.role, firstName: user.firstName, onSignOut: signOut);
+              }
 
-          UserRole role = UserRole.customer;
-          String firstName = 'John Doe';
-          return HomePage(role: role, firstName: firstName, settings: settings);
-        },
+              return HomePage(role: UserRole.customer, firstName: 'John Doe');
+            },
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) => _NotFoundPage(location: state.uri.path),
