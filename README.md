@@ -26,11 +26,11 @@ chargees une fois au demarrage dans `main.dart`.
   [`CurrentUser`](lib/domain/models/current_user.dart) (role, nom, metier,
   centres d'interet, localisation) via
   [`CurrentUserRepository`](lib/domain/repositories/current_user_repository.dart).
-  Au lancement suivant, le routeur ouvre directement l'accueil. Le menu
-  « Reglages » de l'accueil permet de recommencer l'inscription.
-- Theme : clair, sombre ou comme l'appareil, choisi depuis le menu « Reglages »
-  de l'accueil et enregistre via
-  [`SettingsRepository`](lib/domain/repositories/settings_repository.dart).
+  Au lancement suivant, le routeur ouvre directement l'accueil. Le bouton
+  « Recommencer l'inscription » de l'accueil efface l'utilisateur.
+- Theme : le bouton clair/sombre de la barre du haut (`AppShell`) enregistre
+  le choix sous la cle `is_dark_mode`
+  ([`shared_preference_keys.dart`](lib/data/shared_preferences/shared_preference_keys.dart)).
 
 L'avancement d'un onboarding non termine n'est pas enregistre : un redemarrage
 en cours de parcours le recommence. Sans repository fourni (tests), l'application
