@@ -1,4 +1,4 @@
-# esme26
+# esme2026
 
 A new Flutter project.
 
@@ -240,3 +240,5 @@ Validation ciblee des repositories et de la compatibilite existante :
 dart analyze lib/domain/repositories lib/data/repositories lib/data/mocks test/data/repositories test/domain/models
 flutter test test/data/repositories test/domain/models
 ```
+
+class 2027 de appli
