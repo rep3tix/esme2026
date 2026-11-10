@@ -1,3 +1,4 @@
+import 'package:esme26/ui/widgets/onboarding/step_intro.dart';
 import 'package:flutter/material.dart';
 
 class TradeStep extends StatefulWidget {
@@ -14,6 +15,10 @@ class TradeStep extends StatefulWidget {
 class _TradeStepState extends State<TradeStep> {
   final _formKey = GlobalKey<FormState>();
 
+  void _submit() {
+    if (_formKey.currentState!.validate()) widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -21,22 +26,26 @@ class _TradeStepState extends State<TradeStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Quel est votre métier ?', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 24),
+          const StepIntro(
+            icon: Icons.construction_rounded,
+            title: 'Quel est votre métier ?',
+            subtitle: 'Il sera affiché sur votre profil pour que les clients vous trouvent.',
+          ),
           TextFormField(
             initialValue: widget.initialValue,
-            decoration: const InputDecoration(labelText: 'Métier', hintText: 'Ex. : menuisier, potier, électricien…', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Métier',
+              hintText: 'Ex. : menuisier, potier, électricien…',
+              prefixIcon: Icon(Icons.work_outline_rounded),
+            ),
             textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.done,
             onChanged: widget.onChanged,
+            onFieldSubmitted: (_) => _submit(),
             validator: (value) => value == null || value.trim().isEmpty ? 'Indiquez votre métier.' : null,
           ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) widget.onNext();
-            },
-            child: const Text('Continuer'),
-          ),
+          const SizedBox(height: 28),
+          FilledButton(onPressed: _submit, child: const Text('Continuer')),
         ],
       ),
     );

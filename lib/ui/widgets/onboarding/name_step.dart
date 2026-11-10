@@ -1,3 +1,4 @@
+import 'package:esme26/ui/widgets/onboarding/step_intro.dart';
 import 'package:flutter/material.dart';
 
 class NameStep extends StatefulWidget {
@@ -23,40 +24,47 @@ class NameStep extends StatefulWidget {
 class _NameStepState extends State<NameStep> {
   final _formKey = GlobalKey<FormState>();
 
+  void _submit() {
+    if (_formKey.currentState!.validate()) widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Comment vous appelez-vous ?', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 24),
-          TextFormField(
-            initialValue: widget.firstName,
-            decoration: const InputDecoration(labelText: 'Prénom'),
-            textCapitalization: TextCapitalization.words,
-            autofillHints: const [AutofillHints.givenName],
-            onChanged: widget.onFirstNameChanged,
-            validator: _requiredName,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            initialValue: widget.lastName,
-            decoration: const InputDecoration(labelText: 'Nom'),
-            textCapitalization: TextCapitalization.words,
-            autofillHints: const [AutofillHints.familyName],
-            onChanged: widget.onLastNameChanged,
-            validator: _requiredName,
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) widget.onNext();
-            },
-            child: const Text('Continuer'),
-          ),
-        ],
+      child: AutofillGroup(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const StepIntro(
+              icon: Icons.badge_outlined,
+              title: 'Comment vous appelez-vous ?',
+              subtitle: 'Les artisans verront ce nom lors de vos prises de rendez-vous.',
+            ),
+            TextFormField(
+              initialValue: widget.firstName,
+              decoration: const InputDecoration(labelText: 'Prénom', prefixIcon: Icon(Icons.person_outline_rounded)),
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.givenName],
+              onChanged: widget.onFirstNameChanged,
+              validator: _requiredName,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              initialValue: widget.lastName,
+              decoration: const InputDecoration(labelText: 'Nom', prefixIcon: Icon(Icons.person_outline_rounded)),
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.familyName],
+              onChanged: widget.onLastNameChanged,
+              onFieldSubmitted: (_) => _submit(),
+              validator: _requiredName,
+            ),
+            const SizedBox(height: 28),
+            FilledButton(onPressed: _submit, child: const Text('Continuer')),
+          ],
+        ),
       ),
     );
   }

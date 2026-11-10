@@ -8,13 +8,17 @@ class RoleStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Bienvenue !', style: Theme.of(context).textTheme.headlineMedium),
+        Text('Bienvenue !', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        const Text('Comment souhaitez-vous utiliser notre application ?'),
-        const SizedBox(height: 24),
+        Text(
+          'Comment souhaitez-vous utiliser notre application ?',
+          style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 28),
         _RoleCard(
           icon: Icons.handyman_outlined,
           title: 'Je suis artisan',
@@ -43,21 +47,38 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Card(
-      elevation: 5,
+      elevation: 3,
+      shadowColor: scheme.shadow.withValues(alpha: 0.25),
+      color: scheme.surfaceContainerLowest,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.all(20),
+          child: Row(
             children: [
-              Icon(icon, size: 40, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(height: 16),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text(description),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(16)),
+                child: Icon(icon, size: 28, color: scheme.onPrimaryContainer),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Text(description, style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
             ],
           ),
         ),
