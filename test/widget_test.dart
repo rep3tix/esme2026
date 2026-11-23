@@ -6,6 +6,7 @@ import 'package:esme26/main.dart';
 import 'package:esme26/ui/router.dart';
 import 'package:esme26/ui/theme/app_theme.dart';
 import 'package:esme26/ui/widgets/onboarding/kyc_step.dart';
+import 'package:esme26/ui/widgets/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -15,23 +16,23 @@ Future<GoRouter> pumpApp(
   WidgetTester tester, {
   KycRepository? kycRepository,
 }) async {
-  final darkMode = ValueNotifier(false);
+  final themeMode = ValueNotifier(ThemeMode.system);
   final router = createRouter(
-    darkMode: darkMode,
-    onToggleDarkMode: () => darkMode.value = !darkMode.value,
+    themeMode: themeMode,
+    onThemeModeChanged: (mode) => themeMode.value = mode,
     kycRepository: kycRepository,
   );
   addTearDown(() {
     router.dispose();
-    darkMode.dispose();
+    themeMode.dispose();
   });
   await tester.pumpWidget(
-    ValueListenableBuilder<bool>(
-      valueListenable: darkMode,
-      builder: (context, isDarkMode, _) => MaterialApp.router(
+    ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeMode,
+      builder: (context, mode, _) => MaterialApp.router(
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        themeMode: mode,
         routerConfig: router,
       ),
     ),
@@ -60,6 +61,16 @@ Future<void> fillLocation(WidgetTester tester) async {
   await tapText(tester, 'Continuer');
 }
 
+Brightness currentBrightness(WidgetTester tester) =>
+    Theme.of(tester.element(find.byType(Scaffold).first)).brightness;
+
+Future<void> selectThemeMode(WidgetTester tester, String label) async {
+  await tester.tap(find.byTooltip(ThemeModeMenu.tooltip));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(label).last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Role selection uses two elevated clickable cards', (
     tester,
@@ -77,45 +88,53 @@ void main() {
     );
   });
 
-  testWidgets('The app bar toggle switches the app between light and dark', (
+  testWidgets('By default the theme follows the system day/night setting', (
     tester,
   ) async {
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
     await pumpApp(tester);
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
-      Brightness.light,
-    );
-    expect(find.byTooltip('Activer le mode sombre'), findsOneWidget);
+    expect(currentBrightness(tester), Brightness.light);
+    expect(find.byIcon(Icons.brightness_auto_outlined), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Activer le mode sombre'));
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
+    expect(currentBrightness(tester), Brightness.dark);
 
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
-      Brightness.dark,
-    );
-    expect(find.byTooltip('Activer le mode clair'), findsOneWidget);
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    await tester.pumpAndSettle();
+    expect(currentBrightness(tester), Brightness.light);
   });
 
-  testWidgets('Dark mode preference is restored and updated by the toggle', (
+  testWidgets('The app bar menu forces light, dark or system theme', (
+    tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    await pumpApp(tester);
+
+    await selectThemeMode(tester, 'Sombre');
+    expect(currentBrightness(tester), Brightness.dark);
+    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    await selectThemeMode(tester, 'Clair');
+    expect(currentBrightness(tester), Brightness.light);
+
+    await selectThemeMode(tester, 'Système');
+    expect(currentBrightness(tester), Brightness.dark);
+  });
+
+  testWidgets('Legacy dark mode preference is migrated to theme mode', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({isDarkMode: true});
     final preferences = await SharedPreferences.getInstance();
     await tester.pumpWidget(MyApp(preferences: preferences));
+    expect(currentBrightness(tester), Brightness.dark);
 
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
-      Brightness.dark,
-    );
-    await tester.tap(find.byTooltip('Activer le mode clair'));
-    await tester.pumpAndSettle();
-
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold).first)).brightness,
-      Brightness.light,
-    );
-    expect(preferences.getBool(isDarkMode), isFalse);
+    await selectThemeMode(tester, 'Clair');
+    expect(currentBrightness(tester), Brightness.light);
+    expect(preferences.getString(themeMode), 'light');
+    expect(preferences.getBool(isDarkMode), isNull);
   });
 
   testWidgets('Customer flow validates fields and reaches home without KYC', (

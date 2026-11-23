@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 /// ```dart
 /// theme: AppTheme.lightTheme,
 /// darkTheme: AppTheme.darkTheme,
-/// themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+/// themeMode: ThemeMode.system, // ou ThemeMode.light / ThemeMode.dark
 /// ```
 abstract final class AppTheme {
   // ---- Couleurs de marque ------------------------------------------------

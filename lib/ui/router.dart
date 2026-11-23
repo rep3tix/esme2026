@@ -15,8 +15,8 @@ abstract final class AppRoutes {
 
 /// [userRepository] : sans valeur, rien n'est conservé entre deux lancements.
 GoRouter createRouter({
-  required ValueNotifier<bool> darkMode,
-  required VoidCallback onToggleDarkMode,
+  required ValueNotifier<ThemeMode> themeMode,
+  required ValueChanged<ThemeMode> onThemeModeChanged,
   KycRepository? kycRepository,
   CurrentUserRepository? userRepository,
 }) {
@@ -31,8 +31,8 @@ GoRouter createRouter({
       ShellRoute(
         builder: (context, state, child) => AppShell(
           title: state.uri.path == AppRoutes.home ? 'Accueil' : 'Faisons connaissance',
-          darkMode: darkMode,
-          onToggleDarkMode: onToggleDarkMode,
+          themeMode: themeMode,
+          onThemeModeChanged: onThemeModeChanged,
           child: child,
         ),
         routes: [

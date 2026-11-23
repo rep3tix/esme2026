@@ -1,6 +1,7 @@
 import 'package:esme26/data/repositories/local_current_user_repository.dart';
 import 'package:esme26/data/shared_preferences/shared_preference_keys.dart';
 import 'package:esme26/main.dart';
+import 'package:esme26/ui/widgets/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,9 +90,11 @@ void main() {
   testWidgets('user and dark mode are both restored', (tester) async {
     await tester.pumpWidget(MyApp(preferences: prefs));
     await completeCustomerOnboarding(tester);
-    await tester.tap(find.byTooltip('Activer le mode sombre'));
+    await tester.tap(find.byTooltip(ThemeModeMenu.tooltip));
     await tester.pumpAndSettle();
-    expect(prefs.getBool(isDarkMode), isTrue);
+    await tester.tap(find.text('Sombre'));
+    await tester.pumpAndSettle();
+    expect(prefs.getString(themeMode), 'dark');
 
     await restart(tester, prefs);
     expect(find.text('Bienvenue Camille !'), findsOneWidget);

@@ -24,53 +24,65 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late final ValueNotifier<bool> _isDarkMode;
+  late final ValueNotifier<ThemeMode> _themeMode;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
-    _isDarkMode = ValueNotifier(
-      widget.preferences.getBool(isDarkMode) ?? false,
-    );
+    _themeMode = ValueNotifier(_readThemeMode(widget.preferences));
     _router = createRouter(
-      darkMode: _isDarkMode,
-      onToggleDarkMode: _toggleDarkMode,
+      themeMode: _themeMode,
+      onThemeModeChanged: _setThemeMode,
       // L'utilisateur est enregistré dans les mêmes préférences que le thème.
       userRepository: LocalCurrentUserRepository(widget.preferences),
     );
   }
 
-  void _toggleDarkMode() {
-    final nextValue = !_isDarkMode.value;
-    _isDarkMode.value = nextValue;
-    unawaited(_saveDarkMode(nextValue));
+  /// Par défaut le thème suit le système (jour/nuit de l'appareil).
+  /// L'ancien booléen `is_dark_mode` est relu pour ne pas perdre le choix.
+  static ThemeMode _readThemeMode(SharedPreferences preferences) {
+    final stored = preferences.getString(themeMode);
+    for (final mode in ThemeMode.values) {
+      if (mode.name == stored) return mode;
+    }
+    return switch (preferences.getBool(isDarkMode)) {
+      true => ThemeMode.dark,
+      false => ThemeMode.light,
+      null => ThemeMode.system,
+    };
   }
 
-  Future<void> _saveDarkMode(bool value) async {
-    final saved = await widget.preferences.setBool(isDarkMode, value);
+  void _setThemeMode(ThemeMode mode) {
+    _themeMode.value = mode;
+    unawaited(_saveThemeMode(mode));
+  }
+
+  Future<void> _saveThemeMode(ThemeMode mode) async {
+    final saved = await widget.preferences.setString(themeMode, mode.name);
     if (!saved) {
       throw StateError('Unable to save the selected theme mode.');
     }
+    await widget.preferences.remove(isDarkMode);
   }
 
   @override
   void dispose() {
     _router.dispose();
-    _isDarkMode.dispose();
+    _themeMode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _isDarkMode,
-      builder: (context, isDarkMode, _) => MaterialApp.router(
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeMode,
+      builder: (context, mode, _) => MaterialApp.router(
         title: 'Artisanat',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        themeMode: mode,
         routerConfig: _router,
       ),
     );
